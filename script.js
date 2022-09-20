@@ -83,9 +83,13 @@ class App {
     constructor() {
         // get user position
         this._getPosition();
+        // get data from localStorage
+        this._getData();
+
+        //. event listener use this.function , bind if function is included in the eventlistener
         form.addEventListener('submit', this._newWorkout.bind(this));
         inputType.addEventListener('change', this._toggleElevationField); //. does not need to bind because it doesnt return a function (bind returns a function)
-        containerWorkouts.addEventListener('click', _moveToPin.bind(this));
+        containerWorkouts.addEventListener('click', this._moveToPin.bind(this));
     }
 
     _getPosition() {
@@ -115,6 +119,11 @@ class App {
         ).addTo(this.#map);
 
         this.#map.on('click', this._showForm.bind(this)); // . clickevent in leaflet
+
+        //. only render the marker when the map is fully shown
+        this.workouts.forEach((workout) => {
+            this._renderWorkout(workout);
+        });
     }
 
     //> when click on the map, remove the hidden class and show form
@@ -195,6 +204,7 @@ class App {
         this._renderWorkoutMarker(workout);
         this._renderWorkout(workout);
         this._hideForm();
+        this._localStorage();
     }
 
     //> mark the map with pin
@@ -282,6 +292,26 @@ class App {
                 duration: 1,
             },
         });
+    }
+
+    //> store data locally
+    _localStorage() {
+        localStorage.setItem('workouts', JSON.stringify(this.workouts));
+    }
+
+    //> get stored data from local storage
+    _getData() {
+        const data = JSON.parse(localStorage.getItem('workouts')); //! when convert back from local storage, all the predefined methods will be lost. This is no longer a self defined class
+        if (!data) return;
+        this.workouts = data;
+        this.workouts.forEach((workout) => {
+            this._renderWorkout(workout);
+        });
+    }
+
+    reset() {
+        localStorage.removeItem('workouts');
+        location.reload();
     }
 }
 
