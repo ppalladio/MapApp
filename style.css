@@ -151,7 +151,8 @@ a:visited {
 }
 
 .form__input {
-    width: 100%;
+
+    width: 10rem;
     padding: 0.3rem 1.1rem;
     font-family: inherit;
     font-size: 1.4rem;
@@ -160,7 +161,9 @@ a:visited {
     background-color: var(--color-light--3);
     transition: all 0.2s;
 }
-
+.form__input--distance{
+    padding-left: 1rem;
+}
 .form__input:focus {
     outline: none;
     background-color: #fff;
@@ -170,12 +173,6 @@ a:visited {
     display: none;
 }
 
-.copyright {
-    margin-top: auto;
-    font-size: 1.3rem;
-    text-align: center;
-    color: var(--color-light--1);
-}
 
 .twitter-link:link,
 .twitter-link:visited {

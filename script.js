@@ -11,42 +11,76 @@ const inputDuration = document.querySelector('.form__input--duration');
 const inputCadence = document.querySelector('.form__input--cadence');
 const inputElevation = document.querySelector('.form__input--elevation');
 
-navigator?.geolocation.getCurrentPosition(
-    // get geolocation
-    (position) => {
+class App {
+    #map;
+    #mapE;
+    constructor() {
+        this._getPosition();
+        form.addEventListener('submit', this._newWorkout.bind(this));
+        inputType.addEventListener('change', this._toggleElevationField);
+    }
+
+    _getPosition() {
+        navigator.geolocation.getCurrentPosition(
+            this._loadMap.bind(this), //. it is treated as a regular function call, and this keyword is set to undefined, use bind(this) method to point to current object
+            function () {
+                alert('Geolocation is not available');
+            },
+        );
+    }
+
+    // Handling clicks on map
+
+    _loadMap(position) {
         const { latitude, longitude } = position.coords;
-
         const coords = [latitude, longitude];
-        const map = L.map('map').setView(coords, 15);
+        this.#map = L.map('map').setView(coords, 15);
 
-        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
             attribution:
-                '&copy; <a href="https://www.openstreetmap.fr/hot/copyright">OpenStreetMap</a> contributors',
-        }).addTo(map);
+                '&copy; <a href="https://www.openstreetmap.prg/copyright">OpenStreetMap</a> contributors',
+        }).addTo(this.#map);
 
-        L.marker(coords)
-            .addTo(map)
-            .bindPopup('A pretty CSS3 popup.<br> Easily customizable.')
+        this.#map.on('click', this._showForm.bind(this));
+    }
+
+    _showForm(mapEvent) {
+        this.#mapE = mapEvent;
+        form.classList.remove('hidden');
+        inputDistance.focus();
+    }
+
+    _toggleElevationField() {
+        inputElevation
+            .closest('.form__row')
+            .classList.toggle('form__row--hidden'); // toggle if visible is set remove it, otherwise add it
+        inputCadence
+            .closest('.form__row')
+            .classList.toggle('form__row--hidden');
+    }
+
+    _newWorkout(e) {
+        e.preventDefault();
+        inputDistance.value =
+            inputDuration.value =
+            inputCadence.value =
+            inputElevation.value =
+                '';
+        const { lat, lng } = this.#mapE.latlng;
+        L.marker({ lat, lng })
+            .addTo(this.#map)
+            .bindPopup(
+                L.popup({
+                    maxWidth: 250,
+                    minWidth: 100,
+                    autoClose: false,
+                    closeOnClick: false,
+                    className: 'running-popup',
+                }),
+            )
+            .setPopupContent('popup')
             .openPopup();
+    }
+}
 
-        map.on('click', (e) => {
-            const { lat, lng } = e.latlng;
-            L.marker({ lat, lng })
-                .addTo(map)
-                .bindPopup(
-                    L.popup({
-                        maxWidth: 250,
-                        minWidth: 100,
-                        autoClose: false,
-                        closeOnClick: false,
-                        className: 'running-popup',
-                    }),
-                )
-                .setPopupContent('popup')
-                .openPopup();
-        });
-    },
-    () => {
-        alert('Geolocation is not available');
-    },
-);
+const app = new App();
